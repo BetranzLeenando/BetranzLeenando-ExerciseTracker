@@ -14,12 +14,9 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
 
-// Get all users
 app.get("/api/users", (req, res) => {
   res.json(users);
 });
-
-// Add a new user
 app.post("/api/users", (req, res) => {
   const username = req.body.username;
   if (!username) {
@@ -33,19 +30,14 @@ app.post("/api/users", (req, res) => {
 
   res.json(newUser);
 });
-
-// Add exercise to a user
 app.post("/api/users/:_id/exercises", (req, res) => {
   const { _id } = req.params;
   const { description, duration, date } = req.body;
 
-  // Find the user by _id
   const user = users.find((user) => user._id === _id);
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
-
-  // Validate required fields
   if (!description || !duration) {
     return res
       .status(400)
@@ -59,11 +51,10 @@ app.post("/api/users/:_id/exercises", (req, res) => {
 
   const exercise = {
     description,
-    duration: Number(duration), // Ensure duration is a number
+    duration: Number(duration),
     date: exerciseDate.toDateString(),
   };
 
-  // Update user data
   user.exercises = user.exercises || [];
   user.exercises.push(exercise);
 
@@ -77,18 +68,15 @@ app.post("/api/users/:_id/exercises", (req, res) => {
 });
 
 app.get("/api/users/:_id/logs", (req, res) => {
-  const { _id } = req.params; // Mendapatkan _id dari parameter URL
-  const { from, to, limit } = req.query; // Mendapatkan query parameters
-  const user = users.find((user) => user._id === _id); // Mencari user berdasarkan _id
+  const { _id } = req.params;
+  const { from, to, limit } = req.query;
+  const user = users.find((user) => user._id === _id);
 
   if (!user) {
-    return res.status(404).json({ error: "User not found" }); // Jika user tidak ditemukan, kembalikan error
+    return res.status(404).json({ error: "User not found" });
   }
-
-  // Siapkan log latihan (exercises)
   let logs = user.exercises || [];
 
-  // Filter berdasarkan tanggal "from" dan "to"
   if (from) {
     const fromDate = new Date(from);
     if (!isNaN(fromDate)) {
@@ -117,11 +105,10 @@ app.get("/api/users/:_id/logs", (req, res) => {
     }
   }
 
-  // Buat response JSON
   res.json({
     _id: user._id,
     username: user.username,
-    count: logs.length, // Jumlah log yang dikembalikan
+    count: logs.length,
     log: logs.map((log) => ({
       description: log.description,
       duration: log.duration,
@@ -129,8 +116,6 @@ app.get("/api/users/:_id/logs", (req, res) => {
     })),
   });
 });
-
-// Start the server
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log(
     "Your app is listening on http://localhost:" + listener.address().port
